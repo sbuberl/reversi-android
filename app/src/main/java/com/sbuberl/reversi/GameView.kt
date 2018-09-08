@@ -6,17 +6,25 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import kotlin.math.floor
+
 
 class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(context, attrs), SurfaceHolder.Callback  {
     private var canvasWidth = 0
     private var canvasHeight = 0
     private var cellSize = 0f
     private var scoreBoardHeight = 120
+    private var game: Game? = null
 
     init {
         holder.addCallback(this)
+    }
+
+    fun setGame(game: Game) {
+        this.game = game;
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
@@ -35,12 +43,41 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
                 this.holder.unlockCanvasAndPost(it)
             }
         }
+
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val touch = event!!
+        val touched_x = touch.x.toInt()
+        val touched_y = touch.y.toInt()
+
+        val action = touch.action
+        var touched = false
+        when (action) {
+            MotionEvent.ACTION_DOWN -> touched = true
+            MotionEvent.ACTION_MOVE -> touched = true
+            MotionEvent.ACTION_UP -> touched = false
+            MotionEvent.ACTION_CANCEL -> touched = false
+            MotionEvent.ACTION_OUTSIDE -> touched = false
+        }
+
+        if (touched) {
+            val row = 7 - floor((touched_y - scoreBoardHeight) / (cellSize + 1)).toInt() + 1
+            if(row >= 1 && row <= 8) {
+                val column = floor(touched_x / (cellSize + 1)).toInt() + 1
+                val current: Stone = game!!.getStone(row, column)
+                if (current == Stone.NONE || current == Stone.HINT) {
+                    game!!.playMove(row, column, Stone.BLACK)
+                }
+            }
+        }
+        return true
     }
 
     private fun drawBoard(canvas: Canvas) {

@@ -7,6 +7,7 @@ class Game {
 
     constructor(view: GameView) {
         this.view = view
+        view.setGame(this)
     }
 
     fun start() {
@@ -21,6 +22,14 @@ class Game {
         }
 
         isUserTurn = isUserBlack
+    }
+
+    fun getStone(row: Int, column: Int) : Stone {
+        return board.getStone(row, column)
+    }
+
+    fun playMove(row: Int, column: Int, stone: Stone) {
+        board.setStone(row, column, stone)
     }
 
     private fun userEvaluator(row: Int, column: Int): Int {
