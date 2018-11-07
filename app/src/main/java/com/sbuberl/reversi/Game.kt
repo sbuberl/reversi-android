@@ -30,6 +30,7 @@ class Game {
 
     fun playMove(row: Int, column: Int, stone: Stone) {
         board.setStone(row, column, stone)
+        view.drawBoard()
     }
 
     private fun userEvaluator(row: Int, column: Int): Int {
