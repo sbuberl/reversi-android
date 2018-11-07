@@ -21,6 +21,7 @@ class Board : Cloneable {
         this.emptyCells = HashSet<Cell>()
         this.blackMoves = HashSet<EvaluateResult>()
         this.whiteMoves = HashSet<EvaluateResult>()
+        reset();
     }
 
     constructor(other: Board) {
@@ -93,11 +94,11 @@ class Board : Cloneable {
             }
         }
 
-        if(flippedLines.size > 0) {
+        return if(flippedLines.size > 0) {
             tempBoard.setStone(row, column, stone)
-            return EvaluateResult(row, column, tempBoard, value, flippedLines)
+            EvaluateResult(row, column, tempBoard, value, flippedLines)
         } else {
-            return null
+            null
         }
     }
 
