@@ -12,7 +12,7 @@ import android.view.SurfaceView
 import kotlin.math.floor
 
 
-class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(context, attrs), SurfaceHolder.Callback  {
+class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(context, attrs), SurfaceHolder.Callback {
     private var canvasWidth = 0
     private var canvasHeight = 0
     private var cellSize = 0f
@@ -28,7 +28,7 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        var canvas : Canvas? = null
+        var canvas: Canvas? = null
         try {
             canvas = this.holder.lockCanvas(null)
             canvas?.let {
@@ -68,9 +68,9 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
         }
 
         if (touched) {
-            val row = 7 - floor((touched_y - scoreBoardHeight) / (cellSize + 1)).toInt() + 1
-            if(row >= 1 && row <= 8) {
-                val column = floor(touched_x / (cellSize + 1)).toInt() + 1
+            val row = floor((touched_y - scoreBoardHeight) / (cellSize + 1)).toInt()
+            if (row >= 1 && row <= 8) {
+                val column = floor(touched_x / (cellSize + 1)).toInt()
                 val current: Stone = game!!.getStone(row, column)
                 if (current == Stone.NONE || current == Stone.HINT) {
                     game!!.playMove(row, column, Stone.BLACK)
@@ -78,6 +78,23 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
             }
         }
         return true
+    }
+
+    fun drawBoard() {
+        var canvas: Canvas? = null
+        try {
+            canvas = this.holder.lockCanvas(null)
+            canvas?.let {
+                synchronized(this) {
+                    drawBoard(it)
+                }
+            }
+        } finally {
+            canvas?.let {
+                this.holder.unlockCanvasAndPost(it)
+            }
+        }
+
     }
 
     private fun drawBoard(canvas: Canvas) {
@@ -94,8 +111,8 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
         }
 
         cellSize = boardSize / 8.0f - 1
-        var x : Float
-        var y : Float = scoreBoardHeight.toFloat() + 1
+        var x: Float
+        var y: Float = scoreBoardHeight.toFloat() + 1
 
         paint.style = Paint.Style.FILL
         val color = Color.parseColor("#0BA31C")
@@ -105,15 +122,14 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
             x = 1f
             for (column in 0 until 8) {
                 canvas.drawRect(x, y, x + cellSize, y + cellSize, paint)
+                val stone = game!!.getStone(row, column)
+                if (stone == Stone.BLACK || stone == Stone.WHITE) {
+                    drawStone(canvas, row, column, stone)
+                }
                 x += cellSize + 1
             }
             y += cellSize + 1
         }
-
-        drawStone(canvas, 3, 3, Stone.BLACK)
-        drawStone(canvas, 3, 4, Stone.WHITE)
-        drawStone(canvas, 4, 3, Stone.WHITE)
-        drawStone(canvas, 4, 4, Stone.BLACK)
     }
 
     private fun drawStone(canvas: Canvas, row: Int, column: Int, stone: Stone) {
@@ -123,10 +139,10 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
         val centerX = column * (cellSize + 1) + cellSize / 2f
         val centerY = row * (cellSize + 1) + cellSize / 2f + scoreBoardHeight
         val radius = 0.4f * cellSize
-        if(stone == Stone.BLACK) {
+        if (stone == Stone.BLACK) {
             paint.color = Color.BLACK
             canvas.drawCircle(centerX, centerY, radius, paint)
-        } else if(stone == Stone.WHITE) {
+        } else if (stone == Stone.WHITE) {
             paint.color = Color.WHITE
             canvas.drawCircle(centerX, centerY, radius, paint)
         }
