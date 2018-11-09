@@ -18,38 +18,38 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
     private var cellSize = 0f
     private var scoreBoardHeight = 120
     private var game: Game? = null
+    private var thread: GameThread
 
     init {
         holder.addCallback(this)
+        // instantiate the game thread
+        thread = GameThread(holder, this)
     }
 
     fun setGame(game: Game) {
-        this.game = game;
+        this.game = game
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        var canvas: Canvas? = null
-        try {
-            canvas = this.holder.lockCanvas(null)
-            canvas?.let {
-                synchronized(this) {
-                    this.canvasWidth = it.width
-                    this.canvasHeight = it.height
-                    drawBoard(it)
-                }
-            }
-        } finally {
-            canvas?.let {
-                this.holder.unlockCanvasAndPost(it)
-            }
-        }
-
+        thread.setRunning(true)
+        thread.start()
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
+        var retry = true
+        while (retry) {
+            try {
+                thread.setRunning(false)
+                thread.join()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            retry = false
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -80,24 +80,9 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
         return true
     }
 
-    fun drawBoard() {
-        var canvas: Canvas? = null
-        try {
-            canvas = this.holder.lockCanvas(null)
-            canvas?.let {
-                synchronized(this) {
-                    drawBoard(it)
-                }
-            }
-        } finally {
-            canvas?.let {
-                this.holder.unlockCanvasAndPost(it)
-            }
-        }
-
-    }
-
-    private fun drawBoard(canvas: Canvas) {
+    fun drawBoard(canvas: Canvas) {
+        this.canvasWidth = canvas.width
+        this.canvasHeight = canvas.height
         val paint = Paint()
         paint.style = Paint.Style.FILL
         paint.color = Color.BLACK
