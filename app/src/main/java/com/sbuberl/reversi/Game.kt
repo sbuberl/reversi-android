@@ -42,7 +42,18 @@ class Game {
         return board.getStone(row, column)
     }
 
+    fun addHints() {
+        var moves = this.userPlayer.moveList()
+        for (move in moves) {
+            board.setStone(move.row, move.column, Stone.HINT)
+        }
     }
 
+    fun removeHints() {
+        var moves = this.userPlayer.moveList()
+        for (move in moves) {
+            board.setStone(move.row, move.column, Stone.NONE)
+        }
+    }
 
 }

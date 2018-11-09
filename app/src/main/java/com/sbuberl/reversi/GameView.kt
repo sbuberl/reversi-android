@@ -69,11 +69,15 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
 
         if (touched) {
             val row = floor((touched_y - scoreBoardHeight) / (cellSize + 1)).toInt()
-            if (row >= 1 && row <= 8) {
+            if (row in 1..8) {
                 val column = floor(touched_x / (cellSize + 1)).toInt()
                 val current: Stone = game!!.getStone(row, column)
-                if (current == Stone.NONE || current == Stone.HINT) {
-                    game!!.playMove(row, column, Stone.BLACK)
+                if (current == Stone.HINT) {
+                    var user = game!!.userPlayer
+                    var move = user.getValidMove(row, column)
+                    if(move !== null) {
+                        user.play(move)
+                    }
                 }
             }
         }
@@ -110,6 +114,8 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
                 val stone = game!!.getStone(row, column)
                 if (stone == Stone.BLACK || stone == Stone.WHITE) {
                     drawStone(canvas, row, column, stone)
+                } else if (stone == Stone.HINT) {
+                    drawHint(canvas, row, column)
                 }
                 x += cellSize + 1
             }
@@ -120,7 +126,6 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
     private fun drawStone(canvas: Canvas, row: Int, column: Int, stone: Stone) {
         val paint = Paint()
         paint.style = Paint.Style.FILL
-
         val centerX = column * (cellSize + 1) + cellSize / 2f
         val centerY = row * (cellSize + 1) + cellSize / 2f + scoreBoardHeight
         val radius = 0.4f * cellSize
@@ -132,5 +137,16 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
             canvas.drawCircle(centerX, centerY, radius, paint)
         }
     }
+
+    private fun drawHint(canvas: Canvas, row: Int, column: Int) {
+        val paint = Paint()
+        paint.style = Paint.Style.FILL
+        val centerX = column * (cellSize + 1) + cellSize / 2f
+        val centerY = row * (cellSize + 1) + cellSize / 2f + scoreBoardHeight
+        val radius = 0.1f * cellSize
+        paint.color = Color.BLUE
+        canvas.drawCircle(centerX, centerY, radius, paint)
+    }
+
 }
 
