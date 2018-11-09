@@ -42,6 +42,7 @@ class Game {
         return board.getStone(row, column)
     }
 
+<<<<<<< HEAD
     fun addHints() {
         var moves = this.userPlayer.moveList()
         for (move in moves) {
