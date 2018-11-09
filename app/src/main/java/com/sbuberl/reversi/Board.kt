@@ -1,17 +1,11 @@
 package com.sbuberl.reversi
 
-typealias MoveEvaluator = (row: Int, column: Int) -> Int
-
 data class Direction(val rowDelta: Int, val columnDelta: Int)
 
 data class EvaluateResult(val row: Int, val column: Int, val board: Board, val value: Int, val flipped: List<Direction>)
 
 class Board : Cloneable {
     private val cells: Array<Array<Cell>>
-    private val directions = listOf(
-            Direction(-1, -1), Direction(-1, 0), Direction(-1, 1),
-            Direction(-1, 0), Direction(0, 1),
-            Direction(1, -1), Direction(1, 0), Direction(1, 1))
     private val emptyCells: HashSet<Cell>
     private val blackMoves: HashSet<EvaluateResult>
     private val whiteMoves: HashSet<EvaluateResult>
@@ -21,7 +15,7 @@ class Board : Cloneable {
         this.emptyCells = HashSet<Cell>()
         this.blackMoves = HashSet<EvaluateResult>()
         this.whiteMoves = HashSet<EvaluateResult>()
-        reset();
+        reset()
     }
 
     constructor(other: Board) {
@@ -34,6 +28,14 @@ class Board : Cloneable {
 
     override fun clone(): Board {
         return Board(this)
+    }
+
+    fun blackMoves() : HashSet<EvaluateResult> {
+        return this.blackMoves
+    }
+
+    fun whiteMoves() : HashSet<EvaluateResult> {
+        return this.blackMoves
     }
 
     fun reset() {
@@ -65,29 +67,29 @@ class Board : Cloneable {
         emptyCells.remove(cell)
     }
 
-    fun buildMoveList(blackEval: MoveEvaluator, whiteEval: MoveEvaluator) {
+    fun buildMoveList() {
         blackMoves.clear()
         whiteMoves.clear()
 
         for (empty in emptyCells) {
-            checkMove(empty, Stone.BLACK, blackMoves, blackEval)
-            checkMove(empty, Stone.WHITE, whiteMoves, whiteEval)
+            checkMove(empty, Stone.BLACK, blackMoves)
+            checkMove(empty, Stone.WHITE, whiteMoves)
         }
     }
 
-    private fun checkMove(empty : Cell, stone: Stone, moveList: HashSet<EvaluateResult>, evaluator: MoveEvaluator) {
-        val move = evaluate(empty.row, empty.column, stone, evaluator)
+    private fun checkMove(empty : Cell, stone: Stone, moveList: HashSet<EvaluateResult>) {
+        val move = evaluate(empty.row, empty.column, stone)
         move?.let {
             moveList.add(it)
         }
     }
 
-    private fun evaluate(row: Int, column: Int, stone: Stone, evaluator: MoveEvaluator): EvaluateResult? {
+    private fun evaluate(row: Int, column: Int, stone: Stone): EvaluateResult? {
         var tempBoard = clone()
         var value = 0
         val flippedLines = ArrayList<Direction>()
         for (direction in directions) {
-            var result = tempBoard.evaluateLine(row, column, stone, evaluator, direction.rowDelta, direction.columnDelta)
+            var result = tempBoard.evaluateLine(row, column, stone, direction.rowDelta, direction.columnDelta)
             result?.let {
                 value += it
                 flippedLines.add(direction)
@@ -102,7 +104,7 @@ class Board : Cloneable {
         }
     }
 
-    private fun evaluateLine(cellRow: Int, cellColumn: Int, stone: Stone, evaluator: MoveEvaluator, rowDelta: Int, columnDelta: Int) : Int? {
+    private fun evaluateLine(cellRow: Int, cellColumn: Int, stone: Stone, rowDelta: Int, columnDelta: Int) : Int? {
         var current: Stone
         var stopCol = if (columnDelta > 0) 8 else -1
         var stopRow = if (rowDelta > 0) 8 else -1
@@ -117,7 +119,7 @@ class Board : Cloneable {
                 break
             } else if (current != stone) {
                 oppositeFound = true
-                value += evaluator(row, column)
+                value += 1
                 this.cells[row][column].stone = stone
             } else if(oppositeFound) {
                 return value
@@ -127,5 +129,12 @@ class Board : Cloneable {
         }
 
         return null
+    }
+
+    companion object {
+        val directions = listOf(
+            Direction(-1, -1), Direction(-1, 0), Direction(-1, 1),
+            Direction(-1, 0), Direction(0, 1),
+            Direction(1, -1), Direction(1, 0), Direction(1, 1))
     }
 }

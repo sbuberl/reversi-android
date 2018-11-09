@@ -4,40 +4,44 @@ class Game {
     private val board = Board()
     private var isUserTurn: Boolean = false
     private val view: GameView
+    var blackPlayer: Player
+        private set
+    var whitePlayer: Player
+        private set
+    var aiPlayer: Player
+        private set
+    var userPlayer: Player
+        private set
 
     constructor(view: GameView) {
+        val isUserBlack = true //Math.random() >= 0.5
+        if(isUserBlack) {
+            this.blackPlayer = Player(Stone.BLACK, board)
+            this.whitePlayer = Player(Stone.WHITE, board)
+            this.userPlayer = this.blackPlayer
+            this.aiPlayer = this.whitePlayer
+            board.buildMoveList()
+        } else {
+            this.blackPlayer = Player(Stone.BLACK, board)
+            this.whitePlayer = Player(Stone.WHITE, board)
+            this.userPlayer = this.whitePlayer
+            this.aiPlayer = this.blackPlayer
+            board.buildMoveList()
+        }
+
+        isUserTurn = isUserBlack
         this.view = view
         view.setGame(this)
     }
 
     fun start() {
-        val isUserBlack = Math.random() >= 0.5
-        val user: MoveEvaluator = { row: Int, column: Int -> this.userEvaluator(row, column)}
-        val ai: MoveEvaluator = { row: Int, column: Int -> this.aiEvaluator(row, column)}
 
-        if(isUserBlack) {
-            board.buildMoveList(user, ai)
-        } else {
-            board.buildMoveList(ai, user)
-        }
-
-        isUserTurn = isUserBlack
     }
 
     fun getStone(row: Int, column: Int) : Stone {
         return board.getStone(row, column)
     }
 
-    fun playMove(row: Int, column: Int, stone: Stone) {
-        board.setStone(row, column, stone)
-    }
-
-    private fun userEvaluator(row: Int, column: Int): Int {
-        return 1
-    }
-
-    private fun aiEvaluator(row: Int, column: Int): Int {
-        return 1
     }
 
 
