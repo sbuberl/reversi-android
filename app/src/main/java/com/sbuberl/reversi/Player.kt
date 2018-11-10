@@ -22,7 +22,7 @@ class Player {
         }
         val move = moveResult!!
         board.setStone(move.row, move.column, this.stone)
-        this.flipAdjacent(move, 0)
+        this.flipAdjacent(move)
     }
 
     fun getValidMove(row: Int, column: Int) : EvaluateResult? {
@@ -35,30 +35,28 @@ class Player {
         return null
     }
 
-    private fun flipAdjacent(move: EvaluateResult, lineIndex: Int)
-    {
-        var flipped = move.flipped;
-        if(lineIndex < flipped.size)
-        {
-            var direction = Board.directions[lineIndex]
-            var rowDelta = direction.rowDelta
-            var columnDelta = direction.columnDelta
-            this.flipLine(move.row + rowDelta, move.column + columnDelta, rowDelta, columnDelta)
-            this.flipAdjacent(move, lineIndex + 1)
+    private fun flipAdjacent(move: EvaluateResult) {
+        var opposite = this.stone.opposite()
+        if (move.flipped.isNotEmpty()) {
+            for (flipped in move.flipped) {
+                var rowDelta = flipped.rowDelta
+                var columnDelta = flipped.columnDelta
+                this.flipLine(move.row + rowDelta, move.column + columnDelta, rowDelta, columnDelta, opposite)
+            }
         } else {
             //Game.switchTurns();
         }
     }
 
-    fun flipLine(row: Int, col: Int, rowDelta: Int, colDelta: Int) {
+    fun flipLine(row: Int, col: Int, rowDelta: Int, colDelta: Int, opposite: Stone?){
         val stopCol = if (colDelta > 0) 8 else -1
         val stopRow = if (rowDelta > 0) 8 else -1
 
         if (row != stopRow && col != stopCol) {
-            var current = this.board.getStone(row, col);
-            if (current != this.stone && current != Stone.NONE) {
+            var current = this.board.getStone(row, col)
+            if (opposite !== null && current === opposite) {
                 board.setStone(row, col, this.stone)
-                this.flipLine(row + rowDelta, col + colDelta, rowDelta, colDelta)
+                this.flipLine(row + rowDelta, col + colDelta, rowDelta, colDelta, opposite)
                 return
             }
         }
