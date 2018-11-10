@@ -15,27 +15,25 @@ class Game {
 
     constructor(view: GameView) {
         val isUserBlack = true //Math.random() >= 0.5
+        this.blackPlayer = Player(Stone.BLACK, board)
+        this.whitePlayer = Player(Stone.WHITE, board)
         if(isUserBlack) {
-            this.blackPlayer = Player(Stone.BLACK, board)
-            this.whitePlayer = Player(Stone.WHITE, board)
             this.userPlayer = this.blackPlayer
             this.aiPlayer = this.whitePlayer
-            board.buildMoveList()
         } else {
-            this.blackPlayer = Player(Stone.BLACK, board)
-            this.whitePlayer = Player(Stone.WHITE, board)
             this.userPlayer = this.whitePlayer
             this.aiPlayer = this.blackPlayer
-            board.buildMoveList()
+
         }
 
+        board.buildMoveList()
         isUserTurn = isUserBlack
         this.view = view
         view.setGame(this)
     }
 
     fun start() {
-
+        addHints()
     }
 
     fun getStone(row: Int, column: Int) : Stone {
