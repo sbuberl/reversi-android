@@ -69,7 +69,7 @@ class GameView(context: Context, attrs: AttributeSet ? = null): SurfaceView(cont
 
         if (touched) {
             val row = floor((touched_y - scoreBoardHeight) / (cellSize + 1)).toInt()
-            if (row in 1..8) {
+            if (row in 0 until 8) {
                 val column = floor(touched_x / (cellSize + 1)).toInt()
                 val current: Stone = game!!.getStone(row, column)
                 if (current == Stone.HINT) {
